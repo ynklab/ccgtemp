@@ -9,7 +9,7 @@ $ depccg_ja download
 $ pip install more_itertools
 ```
 
-In addition, [vampire](https://vprover.github.io/) Ver.4.4 and [tregex](https://nlp.stanford.edu/software/tregex.html#Download) Ver.3.9.2 are required.
+In addition, [vampire Ver.4.4 with Z3](https://vprover.github.io/bin/vampire_z3_rel_static_release_v4.4) and [tregex Ver.3.9.2](https://nlp.stanford.edu/software/stanford-tregex-2018-10-16.zip) are required. (You should rename the vampire file to "vampire".)
 
 You need to write the path to the vampire and tregex directories in vampire_location.txt and tregex_location.txt respectively.
 
