@@ -1,0 +1,48 @@
+tff(before_before, axiom, ![A:interval, B:interval, C:interval]: (before(A, B) & before(B, C) => before(A, C))).
+tff(before_during, axiom, ![A:interval, B:interval, C:interval]: (before(A, B) & during(B, C) => overlaps(A, C) | before(A, C) | during(A, C))).
+tff(before_contains, axiom, ![A:interval, B:interval, C:interval]: (before(A, B) & contains(B, C) => before(A, C))).
+tff(before_overlaps, axiom, ![A:interval, B:interval, C:interval]: (before(A, B) & overlaps(B, C) => before(A, C))).
+tff(before_overlapped_by, axiom, ![A:interval, B:interval, C:interval]: (before(A, B) & overlapped_by(B, C) => overlaps(A, C) | before(A, C) | during(A, C))).
+tff(after_after, axiom, ![A:interval, B:interval, C:interval]: (after(A, B) & after(B, C) => after(A, C))).
+tff(after_during, axiom, ![A:interval, B:interval, C:interval]: (after(A, B) & during(B, C) => after(A, C) | during(A, C) | overlapped_by(A, C))).
+tff(after_contains, axiom, ![A:interval, B:interval, C:interval]: (after(A, B) & contains(B, C) => after(A, C))).
+tff(after_overlaps, axiom, ![A:interval, B:interval, C:interval]: (after(A, B) & overlaps(B, C) => after(A, C) | during(A, C) | overlapped_by(A, C))).
+tff(after_overlapped_by, axiom, ![A:interval, B:interval, C:interval]: (after(A, B) & overlapped_by(B, C) => after(A, C))).
+tff(during_before, axiom, ![A:interval, B:interval, C:interval]: (during(A, B) & before(B, C) => before(A, C))).
+tff(during_after, axiom, ![A:interval, B:interval, C:interval]: (during(A, B) & after(B, C) => after(A, C))).
+tff(during_during, axiom, ![A:interval, B:interval, C:interval]: (during(A, B) & during(B, C) => during(A, C))).
+tff(during_overlaps, axiom, ![A:interval, B:interval, C:interval]: (during(A, B) & overlaps(B, C) => overlaps(A, C) | before(A, C) | during(A, C))).
+tff(during_overlapped_by, axiom, ![A:interval, B:interval, C:interval]: (during(A, B) & overlapped_by(B, C) => after(A, C) | during(A, C) | overlapped_by(A, C))).
+tff(contains_before, axiom, ![A:interval, B:interval, C:interval]: (contains(A, B) & before(B, C) => overlaps(A, C) | before(A, C) | contains(A, C))).
+tff(contains_after, axiom, ![A:interval, B:interval, C:interval]: (contains(A, B) & after(B, C) => contains(A, C) | after(A, C) | overlapped_by(A, C))).
+tff(contains_during, axiom, ![A:interval, B:interval, C:interval]: (contains(A, B) & during(B, C) => during(A, C) | (A = C) | overlapped_by(A, C) | overlaps(A, C) | contains(A, C))).
+tff(contains_contains, axiom, ![A:interval, B:interval, C:interval]: (contains(A, B) & contains(B, C) => contains(A, C))).
+tff(contains_overlaps, axiom, ![A:interval, B:interval, C:interval]: (contains(A, B) & overlaps(B, C) => overlaps(A, C) | contains(A, C))).
+tff(contains_overlapped_by, axiom, ![A:interval, B:interval, C:interval]: (contains(A, B) & overlapped_by(B, C) => contains(A, C) | overlapped_by(A, C))).
+tff(overlaps_before, axiom, ![A:interval, B:interval, C:interval]: (overlaps(A, B) & before(B, C) => before(A, C))).
+tff(overlaps_after, axiom, ![A:interval, B:interval, C:interval]: (overlaps(A, B) & after(B, C) => contains(A, C) | after(A, C) | overlapped_by(A, C))).
+tff(overlaps_during, axiom, ![A:interval, B:interval, C:interval]: (overlaps(A, B) & during(B, C) => overlaps(A, C) | during(A, C))).
+tff(overlaps_contains, axiom, ![A:interval, B:interval, C:interval]: (overlaps(A, B) & contains(B, C) => overlaps(A, C) | before(A, C) | contains(A, C))).
+tff(overlaps_overlaps, axiom, ![A:interval, B:interval, C:interval]: (overlaps(A, B) & overlaps(B, C) => overlaps(A, C) | before(A, C))).
+tff(overlaps_overlapped_by, axiom, ![A:interval, B:interval, C:interval]: (overlaps(A, B) & overlapped_by(B, C) => during(A, C) | (A = C) | overlapped_by(A, C) | overlaps(A, C) | contains(A, C))).
+tff(overlapped_by_before, axiom, ![A:interval, B:interval, C:interval]: (overlapped_by(A, B) & before(B, C) => overlaps(A, C) | before(A, C) | contains(A, C))).
+tff(overlapped_by_after, axiom, ![A:interval, B:interval, C:interval]: (overlapped_by(A, B) & after(B, C) => after(A, C))).
+tff(overlapped_by_during, axiom, ![A:interval, B:interval, C:interval]: (overlapped_by(A, B) & during(B, C) => during(A, C) | overlapped_by(A, C))).
+tff(overlapped_by_contains, axiom, ![A:interval, B:interval, C:interval]: (overlapped_by(A, B) & contains(B, C) => contains(A, C) | after(A, C) | overlapped_by(A, C))).
+tff(overlapped_by_overlaps, axiom, ![A:interval, B:interval, C:interval]: (overlapped_by(A, B) & overlaps(B, C) => during(A, C) | (A = C) | overlapped_by(A, C) | overlaps(A, C) | contains(A, C))).
+tff(overlapped_by_overlapped_by, axiom, ![A:interval, B:interval, C:interval]: (overlapped_by(A, B) & overlapped_by(B, C) => after(A, C) | overlapped_by(A, C))).
+% tff(before_notreflect, axiom, ![A:interval, B:interval]: (~(A = B) => (before(A, B) <=> ~before(B, A)))).
+% tff(after_notreflect, axiom, ![A:interval, B:interval]: (~(A = B) => (after(A, B) <=> ~after(B, A)))).
+% tff(during_notreflect, axiom, ![A:interval, B:interval]: (~(A = B) => (during(A, B) <=> ~during(B, A)))).
+% tff(contains_notreflect, axiom, ![A:interval, B:interval]: (~(A = B) => (contains(A, B) <=> ~contains(B, A)))).
+% tff(overlaps_notreflect, axiom, ![A:interval, B:interval]: (~(A = B) => (overlaps(A, B) <=> ~overlaps(B, A)))).
+% tff(overlapped_by_notreflect, axiom, ![A:interval, B:interval]: (~(A = B) => (overlapped_by(A, B) <=> ~overlapped_by(B, A)))).
+tff(before_notself, axiom, ![A:interval]: (~before(A, A))).
+tff(after_notself, axiom, ![A:interval]: (~after(A, A))).
+tff(during_notself, axiom, ![A:interval]: (~during(A, A))).
+tff(contains_notself, axiom, ![A:interval]: (~contains(A, A))).
+tff(overlaps_notself, axiom, ![A:interval]: (~overlaps(A, A))).
+tff(overlapped_by_notself, axiom, ![A:interval]: (~overlapped_by(A, A))).
+tff(before_after, axiom, ![A:interval, B:interval]: (~(A = B) => (before(A, B) <=> after(B, A)))).
+tff(during_contains, axiom, ![A:interval, B:interval]: (~(A = B) => (during(A, B) <=> contains(B, A)))).
+tff(overlaps_overlapped_by, axiom, ![A:interval, B:interval]: (~(A = B) => (overlaps(A, B) <=> overlapped_by(B, A)))).

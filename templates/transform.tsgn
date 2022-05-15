@@ -1,0 +1,354 @@
+% % Tsugeson script for Japanese Tense Expressions
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % from: (NP (N (N/N Most) (N _)))?
+% % to: (NP (NP/N Most) (N _))?
+
+% (/^NP\[.*\]\\S\[.*\]$/=w < /あと|後/) > (/^NP$/=x > (/^NP\[.*\]$/=y < /^NP\[.*\]\\NP\[.*\]$/=z))
+
+% relabel w /<S\/S>\\S/
+% delete z
+% excise y y
+% relabel x /S\/S/
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % from: (NP (N (N/N Most) (N _)))?
+% % to: (NP (NP/N Most) (N _))?
+
+% (/^NP\[.*\]\\S\[.*\]$/=w < /まえ|前/) > (/^NP$/=x > (/^NP\[.*\]$/=y < /^NP\[.*\]\\NP\[.*\]$/=z))
+
+% relabel w /<S\/S>\\S/
+% delete z
+% excise y y
+% relabel x /S\/S/
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: する > (S\S > (S < S) > (NP/NP > (NP < (NP < 前) > (S/S < <S/S>\NP > S\NP))))
+% to: する > (S\S > (S\NP < S\NP) > (<S\NP>/<S\NP> < (<<S\NP>/<S\NP>>\<S\NP> < 前) > (<S\NP>/<S\NP> < <S\NP>/<S\NP>)))
+
+する > (/^S\[.*\]\\S\[.*\]$/ > (/^S\[.*\]$/=g < 1(/S\[.*\]/=a) > (/NP\[.*\]\/NP\[.*\]/=b > (/NP\[.*\]/=c < (/NP\[.*\]/=d < 前) > (/S\[.*\]\/S\[.*\]/=e < /<S\[.*\]\/S\[.*\]>\\NP\[.*\]/=f > /S\[.*\]\\NP\[.*\]/)))))
+
+relabel a /S\\NP/
+relabel b /S\\NP/
+excise g g
+relabel c /<S\\NP>\/<S\\NP>/
+relabel d /<<S\\NP>\/<S\\NP>>\\<S\\NP>/
+relabel e /<S\\NP>\/<S\\NP>/
+relabel f /<S\\NP>\/<S\\NP>/
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: S[fin=X3]/S (NP[fin=f] NP/NP (NP 前))
+% to: S/S S ((S/S)\S 前)
+
+(/^NP\[.*\]$/=x < /^まえ|前$/=u) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z) > /^S\[.*\]\/S\[.*fin=X3.*\]$/=a)
+
+relabel x /<S\/S>\\S/
+relabel u /前/
+relabel y /S\/S/
+excise z z
+excise a a
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: S[fin=X3]/S (NP[fin=f] NP/NP (NP 後))
+% to: S/S S ((S/S)\S 後)
+
+(/^NP\[.*\]$/=x < /^あと|後$/=u) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z) > /^S\[.*\]\/S\[.*fin=X3.*\]$/=a)
+
+relabel x /<S\/S>\\S/
+relabel u /後/
+relabel y /S\/S/
+excise z z
+excise a a
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: S[fin=X3]/S (NP[fin=f] NP/NP (NP うち))
+% to: S/S S ((S/S)\S うち)
+
+(/^NP\[.*\]$/=x < /^うち$/=u) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z) > /^S\[.*\]\/S\[.*fin=X3.*\]$/=a)
+
+relabel x /<S\/S>\\S/
+relabel u /うち/
+relabel y /S\/S/
+excise z z
+excise a a
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: S/S (NP (NP ((NP/NP S) (NP まえ|前)) (NP\NP 、)))
+% to: S/S (S/S S ((S/S)\S まえ|前)) ((S/S) 、)
+
+(/^NP\[.*\]$/=x < /^まえ|前$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /^S\[mod=adn,form=base,fin=f\]$/) > (/^NP\[.*\]$/=a < (/^NP\[.*\]\\NP\[.*\]$/=b < /^、$/)))
+
+relabel x /<S\/S>\\S/
+relabel y /S\/S/
+excise z z
+excise a a
+relabel b /<S\/S>\\<S\/S>/
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: S/S (NP (NP ((NP/NP S) (NP あと|後)) (NP\NP 、)))
+% to: S/S (S/S S ((S/S)\S あと|後)) ((S/S) 、)
+
+(/^NP\[.*\]$/=x < /^あと|後$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /^S\[mod=adn,form=base,fin=f\]$/) > (/^NP\[.*\]$/=a < (/^NP\[.*\]\\NP\[.*\]$/=b < /^、$/)))
+
+relabel x /<S\/S>\\S/
+relabel y /S\/S/
+excise z z
+excise a a
+relabel b /<S\/S>\\<S\/S>/
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: S/S (NP (NP ((NP/NP S) (NP うち|間)) (NP\NP 、)))
+% to: S/S (S/S S ((S/S)\S うち|間)) ((S/S) 、)
+
+(/^NP\[.*\]$/=x < /^うち|間$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /^S\[mod=adn,form=base,fin=f\]$/) > (/^NP\[.*\]$/=a < (/^NP\[.*\]\\NP\[.*\]$/=b < /^、$/)))
+
+relabel x /<S\/S>\\S/
+relabel y /S\/S/
+excise z z
+excise a a
+relabel b /<S\/S>\\<S\/S>/
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: (NP < まえ|前) > (NP < (NP/NP < S) > (S/S < (<S/S>\NP < に)))
+% to: (<S/S>\S < まえ|前) > (S/S < S > (S/S < (S/S < に)))
+
+(/^NP\[.*\]$/=x < /^まえ|前$/=u) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /S\[.*\]/) > (/^S\[.*\]\/S\[.*\]$/=a < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=b < /^に$/=c)))
+
+relabel x /<S\/S>\\S/
+relabel y /S\/S/
+relabel b /<S\/S>\\<S\/S>/
+excise z z
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: (NP < あと|後) > (NP < (NP/NP < S) > (S/S < (<S/S>\NP < に)))
+% to: (<S/S>\S < あと|後) > (S/S < S > (S/S < (S/S < に)))
+
+(/^NP\[.*\]$/=x < /^あと|後$/=u) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /S\[.*\]/) > (/^S\[.*\]\/S\[.*\]$/=a < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=b < /^に|で$/=c)))
+
+relabel x /<S\/S>\\S/
+relabel y /S\/S/
+relabel b /<S\/S>\\<S\/S>/
+excise z z
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: (NP < うち|間) > (NP < (NP/NP < S) > (S/S < (<S/S>\NP < に)))
+% to: (<S/S>\S < うち|間) > (S/S < S > (S/S < (S/S < に)))
+
+(/^NP\[.*\]$/=x < /^うち|間$/=u) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /S\[.*\]/) > (/^S\[.*\]\/S\[.*\]$/=a < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=b < /^に$/=c)))
+
+relabel x /<S\/S>\\S/
+relabel y /S\/S/
+relabel b /<S\/S>\\<S\/S>/
+excise z z
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: (NP < とき|時) > (NP < (NP/NP < S) > (S/S < (<S/S>\NP < に)))
+% to: (<S/S>\S < とき|時) > (S/S < S > (S/S < (S/S < に)))
+
+(/^NP\[.*\]$/=x < /^とき|時$/=u) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /S\[.*\]/) > (/^S\[.*\]\/S\[.*\]$/=a < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=b < /^に$/=c)))
+
+relabel x /<S\/S>\\S/
+relabel y /S\/S/
+relabel b /<S\/S>\\<S\/S>/
+excise z z
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: 現在 > NP > S/S
+% to: 現在 > S/S
+
+/^現在$/ > (/^NP\[.*\]$/=x > /^S\[.*\]\/S\[.*\]$/)
+
+excise x x
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: 現在 > (NP > (NP < (NP\NP < 、) > S/S))
+% to: 現在 > (S/S > (S/S < (<S/S>\<S/S> < 、)))
+
+/^現在$/ > (/^NP\[.*\]$/=v > (/^NP\[.*\]$/=w < (/^NP\[.*\]\\NP\[.*\]$/=x < /^、$/) > /S\[.*\]\/S\[.*\]/))
+
+relabel v /S\/S/
+excise w w
+relabel x /<S\/S>\\<S\/S>/
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: 以来 > NP > (NP < (NP/NP < (NP/NP < "数") < (NP/NP < 年)) > (NP < (NP/NP < 、)))
+% to: 以来 > <S/S>\NP > (S/S < (NP < (NP < "数") < (NP\NP < 年)) > (S/S < <S/S>\<S/S>))
+
+/^以来$/ > (/^NP\[.*\]$/=v > (/^NP\[.*\]$/=w < (/^NP\[.*\]\/NP\[.*\]$/=x < /^NP\[.*\]\/NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /^年$/)) > (/^NP\[.*\]$/=s < (/^NP\[.*\]\\NP\[.*\]$/=t < /^、$/))))
+
+relabel v /<S\/S>\\NP/
+relabel w /S\/S/
+relabel t /<S\/S>\\<S\/S>/
+excise s s
+relabel z /NP/
+relabel x /NP/
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: 以来 > NP > (NP < (NP/NP < (NP/NP < "数") < (NP/NP < 年)))
+% to: 以来 > <S/S>\NP > (S/S < (NP < (NP < "数") < (NP\NP < 年)))
+% "以来、"の"、"がない
+
+/^以来$/ > (/^NP\[.*\]$/=v > ((/^NP\[.*\]$/=w > /S\[.*\]\/S\[.*\]/) < (/^NP\[.*\]\/NP\[.*\]$/=x < /^NP\[.*\]\/NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=z < /^年$/))))
+
+relabel v /<S\/S>\\NP/
+excise w w
+relabel z /NP/
+relabel x /NP/
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % from: (NP < 以前|以後|以降) > (NP < (NP/NP) > (S/S < (<S/S>\NP < に)))
+% % to: (<S/S>\<NP/NP> < 以前|以後|以降) > (S/S < (NP/NP) > (S/S < (<S/S>\<S/S> < に)))
+
+% (/^NP\[.*\]$/=x < /^以前|以後|以降$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=w < (/^NP\[.*\]$/=u) < (/^<NP\[.*\]\/NP\[.*\]>\\NP\[.*\]$/=v)) > (/^S\[.*\]\/S\[.*\]$/ < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=z < /^に$/)))
+
+% relabel u /NP\/NP/
+% relabel v /NP/
+% relabel w /NP/
+% relabel x /<S\/S>\\NP/
+% relabel y /S\/S/
+% relabel z /<S\/S>\\<S\/S>/
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % from: (NP < 以前|以後|以降) > (NP < (NP/NP) > (S/S < (<S/S>\NP < 、)))
+% % to: (<S/S>\<NP/NP> < 以前|以後|以降) > (S/S < (NP/NP) > (S/S < (<S/S>\<S/S> < 、)))
+
+% (/^NP\[.*\]$/=x < /^以前|以後|以降$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=w < (/^NP\[.*\]$/=u) < (/^<NP\[.*\]\/NP\[.*\]>\\NP\[.*\]$/=v)) > (/^NP\[.*\]$/=a < (/^NP\[.*\]\\NP\[.*\]$/=z < /^、$/)))
+
+% relabel a /S\/S/
+% relabel u /NP\/NP/
+% relabel v /NP/
+% relabel w /NP/
+% relabel x /<S\/S>\\NP/
+% relabel y /S\/S/
+% relabel z /<S\/S>\\<S\/S>/
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % from: (NP < 以前|以後|以降) > (NP < (NP/NP) > (S/S < (<S/S>\NP < 、)))
+% % to: (<S/S>\<NP/NP> < 以前|以後|以降) > (S/S < (NP/NP) > (S/S < (<S/S>\<S/S> < 、)))
+% % に、、がないバージョン
+
+% (/^NP\[.*\]$/=x < /^以前|以後|以降$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=w < (/^NP\[.*\]$/=u) < (/^<NP\[.*\]\/NP\[.*\]>\\NP\[.*\]$/=v)))
+
+% relabel u /NP\/NP/
+% relabel v /NP/
+% relabel w /NP/
+% relabel x /<S\/S>\\NP/
+% relabel y /S\/S/
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % from: (NP < 以前|以後|以降) > ((NP/NP) < (NP/NP) < (NP/NP) > (S/S < (<S/S>\NP < に)))
+% % to: (<S/S>\<NP/NP> < 以前|以後|以降) > (NP < (NP/NP) > (S/S < (<S/S>\<S/S> < に)))
+
+% (/^NP\[.*\]$/=x < /^以前|以後|以降$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=w <1 (/^NP\[.*\]\/NP\[.*\]$/=u) <2 (/^NP\[.*\]\/NP\[.*\]$/=v)) > (/^S\[.*\]\/S\[.*\]$/ < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=z < /^に$/)))
+
+% relabel u /NP\/NP/
+% relabel v /NP/
+% relabel w /NP/
+% relabel x /<S\/S>\\NP/
+% relabel y /S\/S/
+% relabel z /<S\/S>\\<S\/S>/
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % from: (NP < 以前|以後|以降) > ((NP/NP) < (NP/NP) < (NP/NP) > (S/S < (<S/S>\NP < 、)))
+% % to: (<S/S>\<NP/NP> < 以前|以後|以降) > (NP < (NP/NP) > (S/S < (<S/S>\<S/S> < 、)))
+
+% (/^NP\[.*\]$/=x < /^以前|以後|以降$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=w <1 (/^NP\[.*\]\/NP\[.*\]$/=u) <2 (/^NP\[.*\]\/NP\[.*\]$/=v)) > (/^NP\[.*\]$=a/ < (/^NP\[.*\]\\NP\[.*\]$/=z < /^、$/)))
+
+% relabel a /S\/S/
+% relabel u /NP\/NP/
+% relabel v /NP/
+% relabel w /NP/
+% relabel x /<S\/S>\\NP/
+% relabel y /S\/S/
+% relabel z /<S\/S>\\<S\/S>/
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % from: (NP < 以前|以後|以降) > ((NP/NP) < (NP/NP) < (NP/NP) > (S/S < (<S/S>\NP < 、)))
+% % to: (<S/S>\<NP/NP> < 以前|以後|以降) > (NP < (NP/NP) > (S/S < (<S/S>\<S/S> < 、)))
+% % に、、がないバージョン
+
+% (/^NP\[.*\]$/=x < /^以前|以後|以降$/) > (/^NP\[.*\]$/=y < (/^NP\[.*\]\/NP\[.*\]$/=w <1 (/^NP\[.*\]\/NP\[.*\]$/=u) <2 (/^NP\[.*\]\/NP\[.*\]$/=v)))
+
+% relabel u /NP\/NP/
+% relabel v /NP/
+% relabel w /NP/
+% relabel x /<S\/S>\\NP/
+% relabel y /S\/S/
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % 時間副詞の NP を S/S に変える
+
+% /^S\[.*\]\/S\[.*\]$/=u < (/^NP\[.*\]$/=x < /^NP\[.*\]\/NP\[.*\]$/=y < /^NP\[.*\]$/=z) < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=v < /^に$/)
+
+% relabel v /<S\/S>\\<S\/S>/
+% adjoin (S\/S NP@) x
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % 時間副詞の NP を S/S に変える
+
+% /^NP\[.*\]$/=u < (/^NP\[.*\]$/=x < /^NP\[.*\]\/NP\[.*\]$/=y < /^NP\[.*\]$/=z) < (/^NP\[.*\]\\NP\[.*\]$/=v < /^、$/)
+
+% relabel u /S\/S/
+% relabel v /<S\/S>\\<S\/S>/
+% adjoin (S\/S NP@) x
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % 時間副詞の NP を S/S に変える
+
+% /^S\[.*\]\/S\[.*\]$/=u < (/^NP\[.*\]$/=x < /^NP\[.*\]$/=y < /^NP\[.*\]\\NP\[.*\]$/=z) < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=v < /^に$/)
+
+% relabel y /NP\/NP/
+% relabel z /NP/
+% relabel v /<S\/S>\\<S\/S>/
+% adjoin (S\/S NP@) x
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % 時間副詞の NP を S/S に変える
+
+% /^NP\[.*\]$/=u < (/^NP\[.*\]$/=x < /^NP\[.*\]$/=y < /^NP\[.*\]\\NP\[.*\]$/=z) < (/^NP\[.*\]\\NP\[.*\]$/=v < /^、$/)
+
+% relabel u /S\/S/
+% relabel y /NP\/NP/
+% relabel z /NP/
+% relabel v /<S\/S>\\<S\/S>/
+% adjoin (S\/S NP@) x
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% todo: 2000年4月3日以前に / 2000年の金曜日以前に などの木の修正テンプレートを書く 下のものは間違っている
+% from: (NP < 以前) > (NP < (NP/NP) > (NP < (NP/NP) > (S/S < (<S/S>\NP < に))))
+% to: (<S/S>\<NP/NP> < 以前) > (S/S < (NP/NP < (NP/NP) < (NP/NP)) > (S/S < (<S/S>\<S/S> < に)))
+%
+%(/^NP\[.*\]$/=a < /^以前$/) > (/^NP\[.*\]$/=b < (/^NP\[.*\]\/NP\[.*\]$/=c) > (/^NP\[.*\]$/=d < (/^NP\[.*\]\/NP\[.*\]$/=e !> /^NP\[.*\]\/NP\[.*\]$/) > (/^S\[.*\]\/S\[.*\]$/=f < (/^<S\[.*\]\/S\[.*\]>\\NP\[.*\]$/=g < /^に$/))))
+%
+%relabel a /<S\/S>\\<NP\/NP>/
+%relabel d /S\/S/
+%relabel g /<S\/S>\\<S\/S>/
+%relabel b /NP\/NP/
+%move a $+ b
+%move e $- c
+%adjoin (<NP\/NP> <NP\/NP>@) e
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: (NP\NP < に) > (NP > (S/S < (<S/S>\NP < は)))
+% to: (<S/S>\NP < に) > (S/S > (S/S < (<S/S>\<S/S> < は)))
+
+(/NP\[.*\]\\NP\[.*\]/=s < /に/) > (/NP\[.*\]/=t > (/S\[.*\]\/S\[.*\]/ < (/<S\[.*\]\/S\[.*\]>\\NP/=u < は)))
+
+relabel s /<S\/S>\\NP/
+relabel t /S\/S/
+relabel u /<S\/S>\\<S\/S>/
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% from: 泳い > (S > (S > (S > (S > (S < (S/S < NP < (<S/S>\NP < は)))))))
+% to: 泳い > (S\NP > (S\NP > (S\NP > (S\NP > (S < (NP < NP < (NP\NP < は)))))))
+
+泳い > (/^S\[mod=nm,form=cont,fin=f\]$/=x > (/^S\[mod=nm,form=base,fin=f\]$/=y > (/S\[mod=nm,form=base,fin=f\]/=z > (/S\[mod=nm,form=base,fin=f\]/=u > (/S\[mod=nm,form=base,fin=f\]/ < (/S\[.*\]\/S\[.*\]/=v < /NP\[.*\]/ < (/<S\[.*\]\/S\[.*\]>\\NP\[.*\]/=w < は)))))))
+
+relabel x /S\\NP/
+relabel y /S\\NP/
+relabel z /S\\NP/
+relabel u /S\\NP/
+relabel v /NP/
+relabel w /NP\\NP/

@@ -1,0 +1,19 @@
+tff(interval_type, type, interval: $tType).
+tff(event_type, type, event: $tType).
+tff(normalized_time_type, type, normalized_time: interval > $int).
+tff(year_type, type, '年': interval > $int).
+tff(month_type, type, '月': interval > $int).
+tff(day_type, type, '日': interval > $int).
+tff(nom_type, type, nom: event > $i).
+tff(acc_type, type, acc: event > $i).
+tff(acci_type, type, acci: event > $i).
+tff(dat_type, type, dat: event > $i).
+tff(event_time_type, type, time: event > interval).
+tff(speech_time_type, type, speech_time: interval > $o).
+
+tff(before_type, type, before: (interval * interval) > $o).
+tff(after_type, type, after: (interval * interval) > $o).
+tff(during_type, type, during: (interval * interval) > $o).
+tff(contains_type, type, contains: (interval * interval) > $o).
+tff(overlaps_type, type, overlaps: (interval * interval) > $o).
+tff(overlapped_by_type, type, overlapped_by: (interval * interval) > $o).

@@ -1,0 +1,1099 @@
+#### Semantic templates for Japanese #####
+
+# Basic logical form:
+# x-ga y-o E-suru \C1 C2 K. exists e. (K(E,e) & C1(x,e,Nom) & C2(y,e,Acc))
+
+# Type T ::= Entity | Event | Prop | T1 -> T2 | Interval
+
+# Variable     Type
+# x,y,z,x1,x2  Entity, E
+# e,e1,e2      Event, Ev
+# i            Interval, speech time,  I
+# j,j1,j2      Interval, reference time,  I
+# F,G,F1,F2    E -> Prop
+# J,J1,J2      Ev -> I -> I -> Prop
+# N,N1,N2      (E -> Prop) -> E -> Prop (= Nmod)
+# K,K1,K2      (Ev -> I -> I -> Prop) -> Ev -> I -> I -> Prop (= Vmod)
+# Q,Q1,Q2      Nmod -> (E -> Prop) -> Prop (= NP*)
+# C1,C2        Entity -> Event -> (Event -> Entity) -> Prop (= Role)
+# S,S1,S2      Role -> Role -> Role -> Vmod -> I -> I -> Prop (= S*)
+# V1           (Nmod -> (E -> Prop) -> Prop) -> Role -> Role -> Role -> Vmod -> I -> I -> Prop (= NP* -> S*)
+# V2           (Nmod -> (E -> Prop) -> Prop) -> (Nmod -> (E -> Prop) -> Prop) -> Role -> Role -> Role -> Vmod -> I -> I -> Prop (= NP* -> NP* -> S*)
+# V3           (Role -> Role -> Role -> Vmod -> I -> I -> Prop) -> Role -> Role -> Role -> Vmod -> I -> I -> Prop (=S* -> S*)
+# E            expression (surface form)
+
+# H,H1,H2      I -> Prop 時間副詞を扱うとき以外いらない
+# M,M1,M2      (I -> Prop) -> I -> Prop (= Nmod)  時間副詞を扱うとき以外いらない
+
+# Constant          Type
+# Nom,Acc,Dat,Attr  Event -> Entity
+# AccI              Event -> Prop -> Prop
+
+# Cat         Term : Type
+# S           \C1 C2 C3 K i1. exists e1. K(\e2 i2.(E(e2) & hoge),e1,i1) : Role -> Role -> Role -> Vmod -> I -> Prop (= S*)
+# NP          \N F. Det(\x.N(E,x), F) : NMod -> (E -> Prop) -> Prop (= NP*)
+# S\NP        \Q C1 C2 C3 K i1. exists e. Q(\I.I, \x.exists e.(K(E,e) & C1(x,e,Nom))) : NP* -> S*
+# S\NP\NP     \Q1 Q2 C1 C2 C3 K i1. exists e. Q2(\I.I, \y.Q1(\I.I, \x.exists e.(K(E,e) & C1(x,e,Nom) & C2(y,e,Acc)))) : NP* -> NP* -> S*
+# S\NP\NP\NP  \Q1 Q2 Q3 C1 C2 C3 K i1. exists e. Q3(\I.I, \z.Q2(\I.I, \y.Q1(\I.I, \x.exists e.(K(E,e) & C1(x,e,Nom) & C2(y,e,Acc) & C3(z,e,Dat))))) : NP* -> NP* -> NP* -> S*
+# S/S         \S C1 C2 C3 K i1. S(C1,C2,\J e1 i1.K(\e2 i2.(J(e2,i2) & E(e2)),e1,i1) : S* -> S* (extensional modification)
+# S/S         \S C1 C2 C3 K i1. S(C1,C2,\J e.K(E(J),e)) : S* -> S* (intensional modification)
+# NP/NP       \Q N F. Q(\G x. N(\y.(E(y) & G(y)),x), F) : NP* -> NP* (extensional modification)
+# NP/NP       \Q N F. Q(\G x. N(E(G),x), F) : NP* -> NP* (intensional modification)
+
+
+##### Unary lexical rules #####
+
+# S\NP ==> NP/NP
+- category: NP/NP
+  rule: ADNint
+  child0_category: S\NP
+  semantics: \V1 Q N F. Q(\G.N(\y.(G(y) & V1(\G1 G2.G2(y), \x e T.(T(e) = x), \x e T.(T(e) = x), \x e T.(T(e) = x), \I.I, True, True))), F)
+
+# S ==> NP/NP
+- category: NP/NP
+  rule: ADNext
+  semantics: \S Q N F. Q(\I.I, \x.(Content(x,\K.S(\x e T.(T(e) = x), \x e T.(T(e) = x), \x e T.(T(e) = x), K, True, True)) & F(x)))
+
+# S ==> NP/NP
+- category: NP/NP
+  rule: ADNext
+  semantics: \S Q N F. Q(\G.N(\x.(G(x) & (S(\x e T.(T(e) = x), \x e T.(T(e) = x), \x e T.(T(e) = x), \J e i j.(J(e,True,True) & ((Nom(e) = x))),True,True)))), F)
+  child0_any_category: S\NP[case=nc]
+
+# S ==> NP/NP
+- category: NP/NP
+  rule: ADNext
+  semantics: \S Q N F. Q(\G.N(\x.(G(x) & (S(\x e T.(T(e) = x), \x e T.(T(e) = x), \x e T.(T(e) = x), \J e i j.(J(e,True,True) & ((Nom(e) = x))),True,True)))), F)
+  child0_any_pos: "形容詞"
+
+# S ==> NP/NP
+- category: NP/NP
+  rule: ADNext
+  semantics: \S Q N F. Q(\G.N(\x.(G(x) & (S(\x e T.(T(e) = x), \x e T.(T(e) = x), \x e T.(T(e) = x), \J e i j.(J(e,True,True) & ((Nom(e) = x))),True,True)))), F)
+  child0_any_category: S\S[form=da]
+
+# NP ==> S/S
+- category: S/S
+  rule: ADV0
+  semantics: \Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\I.I,\x.Mod(x,e2))),e1,i2,j2),i1,j1)
+  child0_category: NP
+
+# S ==> S/S
+- category: S/S
+  rule: ADV0
+  semantics: \S1 S2 C1 C2 C3 K i j. (S1(C1,C2,C3,K,i,j) & S2(C1,C2,C3,K,i,j))
+  child0_category: S
+
+
+##### Semantic Templates #####
+
+# Templates for NPs
+- category: NP
+  semantics: \E N F. exists x.(N(E,x) & F(x))
+  coq_type: Entity -> Prop
+
+# Templates for NP modifiers
+- category: NP/NP
+  semantics: \E Q N F. Q(\G x. N(\y.(E(y) & G(y)),x), F)
+  coq_type: Entity -> Prop
+
+- category: NP\NP
+  semantics: \E Q N F. Q(\G x. N(\y.(E(y) & G(y)),x), F)
+  coq_type: Entity -> Prop
+
+# Templates for VP modifiers
+- category: S/S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 j3.(J(e2,i2,j3) & E(e2)),e1,i2,j2),i1,j1)
+  coq_type: Event -> Prop
+
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & E(e2)),e1,i2,j2),i1,j1)
+  coq_type: Event -> Prop
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\I.I, \x.E(e2,x))),e1,i2,j2),i1,j1) # narrow scope
+  coq_type: Event -> Entity -> Prop
+
+# Templates for adjectives
+- category: S
+  semantics: \E C1 C2 C3 K i1 j1. exists e1.K(\e2 i2 j2.(E(e2)),e1,i1,j1)
+  coq_type: Event -> Prop
+
+- category: S
+  semantics: \E C1 C2 C3 K i1 j1. exists e1.K(\e2 i2 j2.(E(e2) & during(time(e2),j2)),e1,i1,j1)
+  coq_type: Event -> Prop
+  pos: 動詞
+
+- category: S[form=base]
+  semantics: \E C1 C2 C3 K i1 j1. exists e1.K(\e2 i2 j2.(E(e2) & during(time(e2),j2) & after(j2,i2)),e1,i1,j1)
+  coq_type: Event -> Prop
+  pos: 動詞
+
+# L0, R0 について L, R なら単純に左右の意味表示をとってくる。L+数字にすればbaseをとってくる
+- category: S[form=cont]
+  semantics: \L0 R0 C1 C2 C3 K i1 j1. exists e1.K(\e2 i2 j2.(L0(e2)),e1,i1,j1)
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+# 「移動している」など
+- category: S[form=cont]
+  semantics: \L1 L2 R0 C1 C2 C3 K i1 j1.exists e1.K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1)
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\J e3 i4 j4.(J(e3,i4,j4) & (e3 = e2)),i3,j3)),e1,i2,j2),i1,j1)
+
+# Templates for VPs
+# non-stative case
+# 「移動する」など
+- category: S[form=stem]\NP[case=ga]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x,e1,Nom)))
+  coq_type: Event -> Prop
+
+# 「歩く」など
+- category: S[form=base]\NP[case=ga]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2, i2)),e1,i1,j1) & C1(x,e1,Nom)))
+  coq_type: Event -> Prop
+
+# 「歩いた」など
+- category: S[form=cont]\NP[case=ga]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x,e1,Nom)))
+  coq_type: Event -> Prop
+
+# 「歩かない」など
+- category: S[form=neg]\NP[case=ga]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x,e1,Nom)))
+  coq_type: Event -> Prop
+
+# 「歩いている」など
+# 連用形の指定が必要になる可能性アリ
+- category: S[form=cont]\NP[case=ga]
+  semantics: \L0 R0 Q C1 C2 C3 K i1 j1.Q(\I.I,\x.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x,e1,Nom)))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+# 「移動している」など
+- category: S[form=cont]\NP[case=ga]
+  semantics: \L1 L2 R0 Q C1 C2 C3 K i1 j1.Q(\I.I,\x.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x,e1,Nom)))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: S[form=stem]\NP[case=o]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x,e1,Acc)))
+  coq_type: Event -> Prop
+
+- category: S[form=base]\NP[case=o]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2, i2)),e1,i1,j1) & C1(x,e1,Acc)))
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=o]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x,e1,Acc)))
+  coq_type: Event -> Prop
+
+- category: S[form=neg]\NP[case=o]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x,e1,Acc)))
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=o]
+  semantics: \L0 R0 Q C1 C2 C3 K i1 j1.Q(\I.I,\x.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x,e1,Acc)))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=o]
+  semantics: \L1 L2 R0 Q C1 C2 C3 K i1 j1.Q(\I.I,\x.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x,e1,Acc)))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: S[form=stem]\NP[case=ni]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x,e1,Dat)))
+  coq_type: Event -> Prop
+
+- category: S[form=base]\NP[case=ni]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2, i2)),e1,i1,j1) & C1(x,e1,Dat)))
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=ni]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x,e1,Dat)))
+  coq_type: Event -> Prop
+
+- category: S[form=neg]\NP[case=ni]
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x,e1,Dat)))
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=ni]
+  semantics: \L0 R0 Q C1 C2 C3 K i1 j1.Q(\I.I,\x.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x,e1,Dat)))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=ni]
+  semantics: \L1 L2 R0 Q C1 C2 C3 K i1 j1.Q(\I.I,\x.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x,e1,Dat)))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: S[form=stem]\NP[case=to]
+  semantics: \E Q C1 C2 C3 K i1 j1. exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,i1) & AccI(e1,Q(\x.True, \x.True)))
+  coq_type: Event -> Prop
+
+- category: S[form=base]\NP[case=to]
+  semantics: \E Q C1 C2 C3 K i1 j1. exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2, i2)),e1,i1,j1) & AccI(e1,Q(\x.True, \x.True)))
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=to]
+  semantics: \E Q C1 C2 C3 K i1 j1. exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & AccI(e1,Q(\x.True, \x.True)))
+  coq_type: Event -> Prop
+
+- category: S[form=neg]\NP[case=to]
+  semantics: \E Q C1 C2 C3 K i1 j1. exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & AccI(e1,Q(\x.True, \x.True)))
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=to]
+  semantics: \L0 R0 Q C1 C2 C3 K i1 j1. exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & AccI(e1,Q(\x.True, \x.True)))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: S[form=cont]\NP[case=to]
+  semantics: \L1 L2 R0 Q C1 C2 C3 K i1 j1. exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & AccI(e1,Q(\x.True, \x.True)))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=stem]\NP[case=ga])\NP[case=o]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=o]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=neg]\NP[case=ga])\NP[case=o]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=base]\NP[case=ga])\NP[case=o]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2,i2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=o]
+  semantics: \L0 R0 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=o]
+  semantics: \L1 L2 R1 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=stem]\NP[case=ga])\NP[case=ni]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,i1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=ni]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  coq_type: Event -> Prop
+
+- category: (S[form=neg]\NP[case=ga])\NP[case=ni]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  coq_type: Event -> Prop
+
+- category: (S[form=base]\NP[case=ga])\NP[case=ni]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2,i2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=ni]
+  semantics: \L0 R0 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=ni]
+  semantics: \L1 L2 R1 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=stem]\NP[case=o])\NP[case=ga]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=o])\NP[case=ga]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=neg]\NP[case=o])\NP[case=ga]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=base]\NP[case=o])\NP[case=ga]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2,i2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=o])\NP[case=ga]
+  semantics: \L0 R0 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=o])\NP[case=ga]
+  semantics: \L1 L2 R1 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Acc))))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=stem]\NP[case=ni])\NP[case=ga]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ni])\NP[case=ga]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  coq_type: Event -> Prop
+
+- category: (S[form=neg]\NP[case=ni])\NP[case=ga]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  coq_type: Event -> Prop
+
+- category: (S[form=base]\NP[case=ni])\NP[case=ga]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2,i2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ni])\NP[case=ga]
+  semantics: \L0 R0 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ni])\NP[case=ga]
+  semantics: \L1 L2 R1 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Dat))))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=stem]\NP[case=o])\NP[case=ni]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x1,e1,Dat) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=o])\NP[case=ni]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Dat) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=neg]\NP[case=o])\NP[case=ni]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Dat) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=base]\NP[case=o])\NP[case=ni]
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2,i2)),e1,i1,j1) & C1(x1,e1,Dat) & C2(x2,e1,Acc))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=o])\NP[case=ni]
+  semantics: \L0 R0 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x1,e1,Dat) & C2(x2,e1,Acc))))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=o])\NP[case=ni]
+  semantics: \L1 L2 R1 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x1,e1,Dat) & C2(x2,e1,Acc))))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=stem]\NP[case=ga])\NP[case=to]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x,e1,Nom) & AccI(e1,Q2(\I.I,\x.True))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=to]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x,e1,Nom) & AccI(e1,Q2(\I.I,\x.True))))
+  coq_type: Event -> Prop
+
+- category: (S[form=neg]\NP[case=ga])\NP[case=to]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x,e1,Nom) & AccI(e1,Q2(\I.I,\x.True))))
+  coq_type: Event -> Prop
+
+- category: (S[form=base]\NP[case=ga])\NP[case=to]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2,i2)),e1,i1,j1) & C1(x,e1,Nom) & AccI(e1,Q2(\I.I,\x.True))))
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=to]
+  semantics: \L0 R0 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x,e1,Nom) & AccI(e1,Q2(\I.I,\x.True))))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=to]
+  semantics: \L1 L2 R0 Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x,e1,Nom) & AccI(e1,Q2(\I.I,\x.True))))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+# よくわかってない
+- category: (S[form=da]\NP[case=ga])\NP
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q2(\I.I, \x1.Q1(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & C2(x2,e1,Attr))))
+  coq_type: Event -> Prop
+
+- category: ((S\NP)\NP)\NP
+  semantics: \E Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x3.Q2(\I.I, \x2.Q1(\I.I, \x1.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Acc) & C2(x2,e1,Dat) & C3(x3,e1,Nom))))))
+  coq_type: Event -> Prop
+
+- category: ((S[form=stem]\NP)\NP)\NP
+  semantics: \E Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x3.Q2(\I.I, \x2.Q1(\I.I, \x1.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x1,e1,Acc) & C2(x2,e1,Dat) & C3(x3,e1,Nom))))))
+  coq_type: Event -> Prop
+
+- category: ((S[form=base]\NP)\NP)\NP
+  semantics: \E Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x3.Q2(\I.I, \x2.Q1(\I.I, \x1.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2,i2)),e1,i1,j1) & C1(x1,e1,Acc) & C2(x2,e1,Dat) & C3(x3,e1,Nom))))))
+  coq_type: Event -> Prop
+
+- category: ((S[form=cont]\NP)\NP)\NP
+  semantics: \L0 R0 Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x3.Q2(\I.I, \x2.Q1(\I.I, \x1.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x1,e1,Acc) & C2(x2,e1,Dat) & C3(x3,e1,Nom))))))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: ((S[form=cont]\NP)\NP)\NP
+  semantics: \L1 L2 R0 Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x3.Q2(\I.I, \x2.Q1(\I.I, \x1.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x1,e1,Acc) & C2(x2,e1,Dat) & C3(x3,e1,Nom))))))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+# おそらく不要
+# - category: ((S\NP[case=ga])\NP[case=ni])\NP[case=o]
+#   semantics: \E Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x3.Q2(\I.I, \x2.Q1(\I.I, \x1.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Acc) & C2(x2,e1,Dat) & C3(x3,e1,Nom))))))
+#   coq_type: Event -> Prop
+
+- category: ((S\NP[case=ga])\NP[case=to])\NP[case=o]
+  semantics: \E Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x1.Q1(\I.I, \x3.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2)),e1,i1,j1) & C1(x1,e1,Nom) & AccI(e1,Q2(\I.I,\x2.True)) & C2(x3,e1,Acc)))))
+  coq_type: Event -> Prop
+
+- category: ((S[form=stem]\NP[case=ga])\NP[case=to])\NP[case=o]
+  semantics: \E Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x1.Q1(\I.I, \x3.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x1,e1,Nom) & AccI(e1,Q2(\I.I,\x2.True)) & C2(x3,e1,Acc)))))
+  coq_type: Event -> Prop
+
+- category: ((S[form=base]\NP[case=ga])\NP[case=to])\NP[case=o]
+  semantics: \E Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x1.Q1(\I.I, \x3.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2), j2) & after(j2,i2)),e1,i1,j1) & C1(x1,e1,Nom) & AccI(e1,Q2(\I.I,\x2.True)) & C2(x3,e1,Acc)))))
+  coq_type: Event -> Prop
+
+- category: ((S[form=cont]\NP[case=ga])\NP[case=to])\NP[case=o]
+  semantics: \L0 R0 Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x1.Q1(\I.I, \x3.exists e1.(K(\e2 i2 j2.(L0(e2)),e1,i1,j1) & C1(x1,e1,Nom) & AccI(e1,Q2(\I.I,\x2.True)) & C2(x3,e1,Acc)))))
+  child0_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+- category: ((S[form=cont]\NP[case=ga])\NP[case=to])\NP[case=o]
+  semantics: \L1 L2 R0 Q1 Q2 Q3 C1 C2 C3 K i1 j1. (Q3(\I.I, \x1.Q1(\I.I, \x3.exists e1.(K(\e2 i2 j2.(L1(e2) & L2(e2)),e1,i1,j1) & C1(x1,e1,Nom) & AccI(e1,Q2(\I.I,\x2.True)) & C2(x3,e1,Acc)))))
+  child0_child0_pos: 名詞
+  child0_child0_pos1: サ変接続
+  child0_child1_pos: 動詞
+  child1_pos: 助詞
+  child1_pos1: 接続助詞
+  coq_type: Event -> Prop
+
+# Templates for particles
+# J(e,i,j) or J(e,True,True) 自信なし
+- category: (NP/NP)\S
+  semantics: \E S Q N F. Q(\G.N(\x.(G(x) & S(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\J e i j.(J(e,i,j) & (Nom(e) = x)),True,True))),F)
+
+# add from onishi
+- category: NP\S
+  semantics: \E S N F. exists x. (N(\x.S(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\J e i j.(J(e,i,j) & (Nom(e) = x)),True,True),x) & F(x))
+
+- category: (S\NP)/(S\NP)
+  semantics: \E V. V
+
+##### Lexical entries #####
+
+# Lexical entries for NPs
+- category: S\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2)),e1,i1,j1) & C1(x,e1,Nom)))
+  pos: 形容詞
+
+- category: NP
+  semantics: \E N F. (N(\x.True,E) & F(E))
+  coq_type: Entity
+  pos1: 固有名詞
+  pos2: 人名
+
+- category: NP/NP
+  semantics: \E Q N F. Q(\G x.(N(G,E)), \x.(F(E) & F(x)))
+  coq_type: Entity
+  pos1: 固有名詞
+  pos2: 人名
+
+- category: NP
+  semantics: \E N F. (N(\x.True,E) & F(E))
+  coq_type: Entity
+  pos1: 代名詞
+
+# - category: NP/NP
+#   semantics: \E Q N F. Q(\G x. ((this(G) = x) & N(\x.True, this(G))), F)
+#   surf: この
+
+- category: NP/NP
+  semantics: \E Q N F. Q(\G x. ((that(G) = x) & N(\x.True, that(G))), F)
+  surf: あの
+
+- category: NP
+  semantics: \E N F. exists x. (N(E,x) & F(x))
+  base: こと
+
+- category: NP
+  semantics: \E N F. exists x. (N(E,x) & F(x))
+  base: の
+
+- category: NP
+  semantics: \E N F. exists x. (N(_人,x) & F(x))
+  base: 人々
+
+- category: NP/NP
+  semantics: \E Q N F. Q(\G.N(\x.(G(x) & _人(x))), F)
+  base: 人々
+
+- category: NP\NP
+  semantics: \E Q N F. Q(N,F)
+  base: たち
+
+- category: NP\NP
+  semantics: \E Q N F. Q(N,F)
+  base: 達
+
+# Lexical entries for NP modifiers
+- category: (NP/NP)\NP
+  semantics: \E Q1 Q2 N F. Q2(\G z. N(\y.(Q1(\I.I, \x.(y = x)) & G(y)), z), F)
+  base: の
+
+- category: (NP/NP)\NP
+  semantics: \E Q1 Q2 N F. Q2(\G z. N(\y.(Q1(\I.I, \x.(E(x) & (y = x))) & G(y)), z), F)
+  pos1: 接尾
+  coq_type: Entity -> Prop
+
+- category: (NP/NP)\S
+  semantics: \E S Q N F. Q(\G.N(\x.(G(x) & S(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\J e i j.(J(e,i,j) & (Nom(e) = x)),True,True))),F)
+  base: の
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\I.I, \x.((Nom(e2) = x)))),e1,i2,j2),i1,j1)
+  base: の
+
+- category: NP\S
+  semantics: \E S N F. S(\x e T.(T(e) = x), \x e T.(T(e) = x), \x e T.(T(e) = x), \J e1 i1 j1.exists x.(J(e1,i1,j1) & (Nom(e1) = x) & F(x)),True,True)
+  base: が
+
+#要テスト
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S1(\x e T.(T(e) = x), \x e T.(T(e) = x), \x e T.(T(e) = x), \J1 e1 i2 j2.K(\e2 i3 j3.(J1(e2,i3,j3) & S2(C1,C2,C3,\J2 e3 i4 j4.(J2(e3,i4,j4) & (Nom(e3) = Nom(e2))),i3,j3)),e1,i2,j2),i1,j1)
+  base: は
+
+#要テスト
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & AccI(e2,S1(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\I.I,i3,j3))),e1,i2,j2),i1,j1)
+  base: という
+
+# Lexical entries for determiners
+- category: NP
+  semantics: \E N F. forall x.(N(\y.True,x) -> F(x))
+  base: すべて
+
+- category: NP
+  semantics: \E N F. forall x.(N(\y.True,x) -> F(x))
+  base: 全員
+
+- category: NP
+  semantics: \E N F. forall x.(N(\y.True,x) -> F(x))
+  base: 各々
+
+- category: NP
+  semantics: \E N F. forall x.(N(\y.True,x) -> F(x))
+  base: それぞれ
+
+- category: NP
+  semantics: \E N F. exists x.(N(\y.True,x) & F(x))
+  base: 誰か
+
+- category: NP
+  semantics: \E N F. Most(\x.N(\y.True,x),F)
+  base: ほとんど
+
+- category: NP
+  semantics: \E N F. Most(\x.N(\y.True,x),F)
+  base: 多く
+
+- category: NP
+  semantics: \E N F. exists x.(N(\y.True,x) & F(x))
+  base: 誰
+
+- category: NP
+  semantics: \E N F. exists x.(N(\y.True,x) & F(x))
+  base: 何
+
+- category: NP
+  semantics: \E N F. exists x.(N(\y.True,x) & F(x))
+  base: どちら
+
+- category: NP/NP
+  semantics: \E Q. Q
+  base: ある
+
+- category: NP/NP
+  semantics: \E Q N F. forall x.(Q(\G.N(\y.(G(y) & (x = y))), \y.True) -> F(x))
+  base: あらゆる
+
+- category: NP/NP
+  semantics: \E Q N F. forall x.(Q(\G.N(\y.(G(y) & (x = y))), \y.True) -> F(x))
+  base: 全
+
+- category: NP/NP
+  semantics: \E Q N F. forall x.(Q(\G.N(\y.(G(y) & (x = y))), \y.True) -> F(x))
+  base: 各
+
+- category: NP/NP
+  semantics: \E Q N F. Q(N,F)
+  base: どの
+
+- category: NP/NP
+  semantics: \E Q N F. forall x.(Q(\G.N(\y.(G(y) & (x = y))), \y.True) -> F(x))
+  base: みな
+
+- category: (NP/NP)\NP
+  semantics: \E Q1 Q2 N F. (Q1(N,F) | Q2(N,F))
+  base: か
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,K,i1,j1)
+  base: か
+
+- category: NP\NP
+  semantics: \E Q. Q
+  pos2: 助数詞
+
+# Lexical entries for particles and other expressions
+- category: NP\NP
+  semantics: \E Q. Q
+  pos: 助詞
+
+- category: NP[case=to]\S
+  semantics: \E S N F. S(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\I.I,True,True)
+
+- category: NP\S
+  semantics: \E S N F. WH(S(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\I.I,True,True))
+  base: か
+
+- category: (NP/NP)\NP
+  semantics: \E Q1 Q2 N F. (Q1(N,F) & Q2(N,F))
+  base: と
+
+- category: S/S
+  semantics: \E S. S
+  base: 少なくとも
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. Q(\I.I, \x.S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & (Nom(e2) = x)),e1,i2,j2)),i1,j1)
+  base: が
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\I.I,\x.((Dat(e2) = x)))),e1,i2,j2),i1,j1) # narrow scope
+  coq_type: Event -> Entity -> Prop
+  base: に
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. Q(\I.I, \x.S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & (Acc(e2) = x)),e1,i2,j2),i1,j1))
+  coq_type: Event -> Entity -> Prop
+  base: を
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. Q(\I.I, \x.S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & (Nom(e2) = x)),e1,i2,j2),i1,j1))
+  base: は
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. Q(\I.I, \x.S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & (Nom(e2) = x)),e1,i2,j2),i1,j1))
+  base: として
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. Q(\I.I, \x.S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & E(x)),e1,i2,j2),i1,j1))
+  coq_type: Entity -> Prop
+  base: 人
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. forall x. (S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & (Nom(e2) = x)),e1,i2,j2),i1,j1) | Q(\I.I, \y.(x = y)))
+  base: しか
+
+# 要テスト
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. (S1(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\I.I,i1,j1) -> S2(C1,C2,C3,K,i1,j1))
+  base: ば
+
+# Lexical entries for verbs
+- category: S\NP[case=ga]
+  semantics: \E Q C1 C2 C3 K i1 j1. -Q(\I.I, \x.True)
+  base: ない
+
+- category: S\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. exists e.(K(Poss,e,i1,j1) & AccI(e,Q(\I.I, \x.True)))
+  base: 有り得る
+  coq_type: Event -> Prop
+
+- category: S\NP
+  semantics: \L R Q C1 C2 C3 K i1 j1. Q(\I.I,\x.exists e.(K(NonPoss,e,i1,j1) & C1(x,e,Nom)))
+  child0_base: 有り得る
+  child1_base: ない
+
+# Lexical entries for copula
+- category: (S\NP[case=ga])\NP
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q2(\I.I, \x.exists e.(C1(x,e,Nom) & Q1(\I.I,\y.(y = x)) & K(\w u v.True,e,i1,j1)))
+  base: だ
+
+- category: (S\NP[case=ga])\NP
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q2(\I.I, \x.exists e.(C1(x,e,Nom) & Q1(\I.I,\y.(y = x)) & K(\w u v.True,e,i1,j1)))
+  surf: で
+
+- category: S\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e.(C1(x,e,Nom) & K(\w u v.True,e,i1,j1)))
+  base: だ
+
+- category: S\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e.(K(\w u v.True,e,i1,j1)))
+  pos: 助動詞
+  surf: で
+
+- category: S\S
+  semantics: \E S. S
+  base: だ
+
+- category: S\S
+  semantics: \E S. S
+  base: です
+
+# 「でしょう」の「う」
+- category: S\S
+  semantics: \E S. S
+  base: う
+  pos: 助動詞
+
+- category: S\S
+  semantics: \E S. S
+  base: ます
+
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,K,i1,j1)
+  surf: だ
+
+
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,K,i1,j1)
+  surf: て
+
+# 間違っているかも
+- category: S
+  semantics: \E C1 C2 C3 K i1 j1. exists e.K(E,e,i1,j1)
+  coq_type: Event -> Prop
+  base: だ
+
+- category: (S\NP[case=ga])\NP
+  semantics: \E Q1 Q2 C1 C2 C3 K i1 j1. Q2(\I.I, \x.exists e.(C1(x,e,Nom) & Q1(\I.I,\y.(y = x)) & K(\w u v.True,e,i1,j1)))
+  base: は
+
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,K,i1,j1)
+  base: は
+
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. -S(C1,C2,C3,K,i1,j1)
+  base: ない
+
+# from onishi
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. -S(C1,C2,C3,K,i1,j1)
+  base: ん
+
+- category: S
+  semantics: \E C1 C2 C3 K i1 j1. exists e.K(\e2 j2. E(e2),e1,i1,j1)
+  coq_type: Event -> Prop
+  pos1: "サ変接続"
+
+- category: S/S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,K,i1,j1)
+  base: もし
+
+- category: S\S
+  semantics: \E S. S
+  base: れる
+
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & E(e2)),e1,i2,j2),i1,j1)
+  base: せる
+
+- category: S/S
+  semantics: \E I.I
+  base: に
+
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & before(j3,i3)),e1,i2,j2),i1,j1)
+  surf: た
+
+# いる、ある、する from onishi
+- category: (S[form=base]\NP[case=ga])\NP[case=ni]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & after(j2,i2) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1)))) # in paticular(non past) # in general(habit)
+  # semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & ((j1 = j2) | before(j1,j2)) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1)))) # in paticular(non-past)
+  base: いる
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=ni]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1))))
+  base: いる
+
+- category: S[form=base]\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & after(j2,i2)),e1,i1,j1) & C1(x,e1,Nom))) # in general(habit)
+  # semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & ((j1 = j2) | before(j1,j2))),e1,i1,j1) & C1(x,e1,Nom))) # in paticular(non-past)
+  coq_type: Event -> Prop
+  base: いる
+
+- category: S[form=cont]\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2)),e1,i1,j1) & C1(x,e1,Nom)))
+  coq_type: Event -> Prop
+  base: いる
+#
+- category: S[form=base]\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.(K(\e2 i3 j3.(J(e2,i3,j3) & overlaps(time(e2),j3) & after(j3,i3)),e1,i2,j2)),i1,j1) # in general(habit)
+  # semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.(K(\e2 i3 j3.(J(e2,i3,j3) & overlaps(time(e2),j3) & ((j2 = j3) | before(j2,j3))),e1,i2,j2)),i1,j1) # in paticular(non-past)
+  base: いる
+#
+- category: S[form=cont]\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.(K(\e2 i3 j3.(J(e2,i3,j3) & overlaps(time(e2),j3)),e1,i2,j2)),i1,j1)
+  base: いる
+
+- category: (S[form=base]\NP[case=ga])\NP[case=ni]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & after(j2,i2) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1)))) # in general(habit)
+  # semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & ((j1 = j2) | before(j1,j2)) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1)))) # in apticular(non-past)
+  base: ある
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=ni]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1))))
+  base: ある
+
+- category: S[form=base]\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & after(j2,i2)),e1,i1,j1) & C1(x,e1,Nom))) # in general(habit)
+  # semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2) & ((j1 = j2) | before(j1,j2))),e1,i1,j1) & C1(x,e1,Nom))) # in paticular(non-past)
+  coq_type: Event -> Prop
+  base: ある
+
+- category: S[form=cont]\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & overlaps(time(e2),j2)),e1,i1,j1) & C1(x,e1,Nom)))
+  coq_type: Event -> Prop
+  base: ある
+#
+- category: S[form=base]\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.(K(\e2 i3 j3.(J(e2,i3,j3) & overlaps(time(e2),j3) & after(j3,i3)),e1,i2,j2)),i1,j1) # in general(habit)
+  # semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.(K(\e2 i3 j3.(J(e2,i3,j3) & overlaps(time(e2),j3) & ((j2 = j3) | before(j2,j3))),e1,i2,j2)),i1,j1) # in paticular(non-past)
+  base: ある
+#
+- category: S[form=cont]\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.(K(\e2 i3 j3.(J(e2,i3,j3) & overlaps(time(e2),j3)),e1,i2,j2)),i1,j1)
+  base: ある
+
+- category: S\S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.(K(\e2 i3 j3.(J(e2,i3,j3)),e1,i2,j2)),i1,j1)
+  pos: 助動詞
+  base: ある
+
+- category: (S[form=base]\NP[case=ga])\NP[case=o]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2),j2) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1)))) # in general(habit)
+  # semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2),j2) & before(j1,j2) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1)))) # in paticular(non-past)
+  base: する
+
+- category: (S[form=cont]\NP[case=ga])\NP[case=o]
+  semantics: \E Q2 Q1 C1 C2 C3 K i1 j1. Q1(\I.I, \x1.Q2(\I.I, \x2.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2),j2) & C1(x1,e2,Nom) & C2(x2,e2,Dat)),e1,i1,j1))))
+  base: する
+
+- category: S[form=base]\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2),j2)),e1,i1,j1) & C1(x,e1,Nom))) # in general(habit)
+  # semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2),j2) & before(j1,j2)),e1,i1,j1) & C1(x,e1,Nom))) # in paticular(non-past)
+  coq_type: Event -> Prop
+  base: する
+
+- category: S[form=cont]\NP
+  semantics: \E Q C1 C2 C3 K i1 j1. Q(\I.I, \x.exists e1.(K(\e2 i2 j2.(E(e2) & during(time(e2),j2)),e1,i1,j1) & C1(x,e1,Nom)))
+  coq_type: Event -> Prop
+  base: する
+
+- category: S[form=base]\S
+  semantics: \E S C1 C2 C3 K i1 j1.S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & E(e2) & during(time(e2),j3)),e1,i2,j2),i1,j1) # in general(habit)
+  # semantics: \E S C1 C2 C3 K i1 j1.S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & E(e2) & during(time(e2),j3) & before(j1,j2)),e1,i2,j2),i1,j1) # in paticular(non-past)
+  base: する
+
+- category: S[form=cont]\S
+  semantics: \E S C1 C2 C3 K i1 j1.S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & E(e2) & during(time(e2),j3)),e1,i2,j2),i1,j1)
+  base: する
+
+# Lexical entries for temporal connectives
+# 主節　埋め込み節
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(C1,C2,C3,\J e3 i4 j4.(exists j5.((before(j4,j5)) & J(e3,i4,j5))),j3,j3)),e1,i2,j2),i1,j1)
+  base: 前
+
+# Sの最後の2つの引数がわからん
+- category: ((S\NP)/(S\NP))\(S\NP)
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(C1,C2,C3,\J e3 i4 j4.(exists j5.((before(j4,j5)) & J(e3,i4,j5))),j3,j3)),e1,i2,j2),i1,j1)
+  base: 前
+
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(C1,C2,C3,\J e3 i4 j4.(exists j5.(before(j5,j4) & J(e3,i4,j5))),j3,j3)),e1,i2,j2),i1,j1)
+  base: 後
+
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(C1,C2,C3,\J e3 i4 j4.(exists j5.(during(j4,j5) & during(j5,time(e3)) & J(e3,i4,j5))),j3,j3)),e1,i2,j2),i1,j1)
+  base: うち
+
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(C1,C2,C3,\J e3 i4 j4.(exists j5.(during(j4,j5) & during(j5,time(e3)) & J(e3,i4,j5))),j3,j3)),e1,i2,j2),i1,j1)
+  base: 間
+#
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(C1,C2,C3,\J e3 i4 j4.(J(e3,i4,j4) & during(j4,time(e3))),j3,j3)),e1,i2,j2),i1,j1)
+  base: とき
+#
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(C1,C2,C3,\J e3 i4 j4.(J(e3,i4,j4) & during(j4,time(e3))),j3,j3)),e1,i2,j2),i1,j1)
+  base: 時
+
+- category: (S/S)\S
+  semantics: \E S1 S2 C1 C2 C3 K i1 j1. S2(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & S1(C1,C2,C3,\J e3 i4 j4.(exists j5.(before(j5,j4) & (j4 = time(e2)) & J(e3,i4,j5))),j3,j3)),e1,i2,j2),i1,j1)
+  base: 以来
+
+# 時間的副詞を扱うための意味表示
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\I.I, \x.before(j3,x))),e1,i2,j2),i1,j1) # narrow scope
+  coq_type: Event -> Entity -> Prop
+  base: 以前
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\I.I, \x.after(j3,x))),e1,i2,j2),i1,j1) # narrow scope
+  coq_type: Event -> Entity -> Prop
+  base: 以後
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\I.I, \x.after(j3,x))),e1,i2,j2),i1,j1) # narrow scope
+  coq_type: Event -> Entity -> Prop
+  base: 以降
+
+- category: (S/S)\NP
+  semantics: \E Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\I.I, \x.after(j3,x))),e1,i2,j2),i1,j1) # narrow scope
+  coq_type: Event -> Entity -> Prop
+  base: 以来
+
+- category: NP/NP
+  semantics: \E Q N F.Q(\G x.N(\y.(G(y)=E),x),F)
+  pos: 名詞
+  pos1: 数
+
+- category: NP
+  semantics: \E N F.exists x.(N(\y.(normalized_time(y) = E),x) & F(x))
+  pos: 時間表現
+
+- category: S
+  semantics: \L0 R0 C1 C2 C3 K i1 j1.exists x.((normalized_time(x) = L0 & x = j1) & exists e.K(\w u v.True,e,i1,j1))
+  child0_pos: 時間表現
+  child1_pos: 助動詞
+  child1_base: だ
+
+- category: S/S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & during(i3, j3)),e1,i2,j2),i1,j1)
+  coq_type: Event -> Prop
+  base: 現在
+
+- category: S/S
+  semantics: \E S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & i3 = j3),e1,i2,j2),i1,j1)
+  coq_type: Event -> Prop
+  base: 今
+
+- category: (S/S)\(S/S)
+  semantics: \E V3. V3
+  coq_type: Event -> Entity -> Prop
+  base: に
+
+- category: (S/S)\(S/S)
+  semantics: \E V3. V3
+  coq_type: Event -> Entity -> Prop
+  base: は
+
+# NP ==> S/S
+# 時間を表す NP に関する unary rule
+- category: S/S
+  rule: <Time>
+  semantics: \Q S C1 C2 C3 K i1 j1. S(C1,C2,C3,\J e1 i2 j2.K(\e2 i3 j3.(J(e2,i3,j3) & Q(\F x.(F(x) & (x = j3)),\x.True)),e1,i2,j2),i1,j1)
+  child0_category: NP
+
+# Punctuation
+- category: (NP/NP)\(NP/NP)
+  semantics: \E X. X
+  base: 、
+
+- category: NP\NP
+  semantics: \E X. X
+  base: 、
+
+- category: S\S
+  semantics: \E X. X
+  base: 、
+
+- category: (S/S)\(S/S)
+  semantics: \E X. X
+  base: 、
+
+- category: S\S
+  semantics: \E S. exists s r. S(\x e T.(T(e) = x),\x e T.(T(e) = x),\x e T.(T(e) = x),\J e i j.(J(e,s,r) & speech_time(s)),s,r)
+  base: 。
