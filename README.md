@@ -81,3 +81,33 @@ $ ./temporal_inference_wrap.sh plmute
 It may take 20 hours to complete. (Depends on the performance of the execution environment)
 
 The result will be output to plmute/overall_results.tsv.
+
+## Citation
+
+If you use this dataset in any published research, please cite the following:
+
+* Tomoki Sugimoto and Hitomi Yanaka. 2022. [Compositional Semantics and Inference System for Temporal Order based on Japanese CCG](https://aclanthology.org/2022.acl-srw.10/). In Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics: Student Research Workshop, pages 104–114, Dublin, Ireland. Association for Computational Linguistics.
+
+```bibtex
+@inproceedings{sugimoto-yanaka-2022-compositional,
+    title = "Compositional Semantics and Inference System for Temporal Order based on {J}apanese {CCG}",
+    author = "Sugimoto, Tomoki  and
+      Yanaka, Hitomi",
+    booktitle = "Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics: Student Research Workshop",
+    month = may,
+    year = "2022",
+    address = "Dublin, Ireland",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.acl-srw.10",
+    pages = "104--114",
+}
+```
+
+## Contact
+
+For questions and usage issues, please contact sugimoto.tomoki@is.s.u-tokyo.ac.jp .
+
+## License
+
+* [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+* Apache License, Version2.0
