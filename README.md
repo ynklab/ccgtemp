@@ -110,4 +110,3 @@ For questions and usage issues, please contact sugimoto.tomoki@is.s.u-tokyo.ac.j
 ## License
 
 * [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
-* Apache License, Version2.0
