@@ -405,21 +405,52 @@ def prove_vampire(premises, conclusion, predicates, lst, axioms, mode, mode2=".p
                 time_axioms += axioms["irai_extend"]
             if "出す" in f:
                 time_axioms += axioms["irai_emit"]
-    time_axioms = list(set(time_axioms))
+    hyp_time = 0
+    if 'normalized_time' in fols[-1]:
+        hyp_time = int(re.findall(r'normalized_time.+?= (\d+)', fols[-1])[0])
+    day_flag = (4000 <= hyp_time < 5000)
     events = list(set(events))
     if "現在" in sentences[-1]:
         time_axioms += axioms["now"]
     else:
         izen_c = join_sentences.count("以前")
         ikou_c = join_sentences.count("以後") + join_sentences.count("以降")
+        join_premises = ''.join(sentences[:-1])
+        daynum = 0
+        if "月曜" in join_premises:
+            daynum = 1
+        elif "火曜" in join_premises:
+            daynum = 2
+        elif "水曜" in join_premises:
+            daynum = 3
+        elif "木曜" in join_premises:
+            daynum = 4
+        elif "金曜" in join_premises:
+            daynum = 5
+        elif "土曜" in join_premises:
+            daynum = 6
+        elif "日曜" in join_premises:
+            daynum = 7
         if izen_c:
-            time_axioms.append(axioms["temporal_order"][0])
+            if daynum and day_flag:
+                time_axioms.append(axioms["temporal_order_day"][daynum - 1])
+            else:
+                time_axioms.append(axioms["temporal_order"][0])
             if izen_c > 1:
-                time_axioms.append(axioms["temporal_order"][2])
+                if daynum and day_flag:
+                    time_axioms.append(axioms["temporal_order_day"][13 + daynum])
+                else:
+                    time_axioms.append(axioms["temporal_order"][2])
         if ikou_c:
-            time_axioms.append(axioms["temporal_order"][1])
+            if daynum and day_flag:
+                time_axioms.append(axioms["temporal_order_day"][6 + daynum])
+            else:
+                time_axioms.append(axioms["temporal_order"][1])
             if ikou_c > 1:
-                time_axioms.append(axioms["temporal_order"][3])
+                if daynum and day_flag:
+                    time_axioms.append(axioms["temporal_order_day"][20 + daynum])
+                else:
+                    time_axioms.append(axioms["temporal_order"][3])
 
     if nort:
         event_axiom = axioms["event"][1]
@@ -427,6 +458,7 @@ def prove_vampire(premises, conclusion, predicates, lst, axioms, mode, mode2=".p
         event_axiom = axioms["event"][0]
     for event in events:
         time_axioms.append(event_axiom.replace("'temp'", event))
+    time_axioms = list(set(time_axioms))
 
     with open('./templates/temporal_relation_axioms.tptp', 'r') as infile:
         time_rel_axioms = infile.read()
